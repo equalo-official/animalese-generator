@@ -2,7 +2,7 @@ import random
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'Oh me. Im not much of a traveler. I may have had a run in with a train in the past. But I got tired of chasing trains. Finally realized that the best way to catch one is to catch a ride on one. But I digress.'
+stringy = 'The quick brown fox jumps over the lazy dog'
 pitch = 'low' # choose between 'high', 'med', 'low', or 'lowest'
 
 stringy = stringy.lower()
@@ -36,16 +36,11 @@ for i, char in enumerate(stringy):
 			continue
 	except:
 		pass
-	if !char.isalpha() and char != '.': # skip characters that are not letters or periods. 
+	if not char.isalpha() and char != '.': # skip characters that are not letters or periods. 
 		continue
 	infiles.append(sounds[char])
 
-octaves = 2 # shift the pitch up by half an octave (speed will increase proportionally)
-tempsound = AudioSegment.from_wav(infiles[0])
-new_sample_rate = int(tempsound.frame_rate * (2.0 ** octaves))
-
-combined_sounds = tempsound._spawn(tempsound.raw_data, overrides={'frame_rate': new_sample_rate})
-combined_sounds = combined_sounds.set_frame_rate(44100) # set uniform sample rate
+combined_sounds = None
 
 print(len(infiles))
 for index,sound in enumerate(infiles):
@@ -60,7 +55,7 @@ for index,sound in enumerate(infiles):
 	new_sample_rate = int(tempsound.frame_rate * (2.0 ** octaves))
 	new_sound = tempsound._spawn(tempsound.raw_data, overrides={'frame_rate': new_sample_rate})
 	new_sound = new_sound.set_frame_rate(44100) # set uniform sample rate
-	combined_sounds += new_sound
+	combined_sounds = new_sound if combined_sounds is None else combined_sounds + new_sound
 
 
 combined_sounds.export("./sound.wav", format="wav")
