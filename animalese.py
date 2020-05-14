@@ -36,6 +36,8 @@ for i, char in enumerate(stringy):
 			continue
 	except:
 		pass
+	if !char.isalpha() and char != '.': # skip characters that are not letters or periods. 
+		continue
 	infiles.append(sounds[char])
 
 octaves = 2 # shift the pitch up by half an octave (speed will increase proportionally)
