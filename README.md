@@ -1,7 +1,4 @@
 # Animalese Audio Generator
-======
-## Table of contents
-
 
 ## General info
 This project allows you to generate audio from text in the style of animalese from the Animal Crossing games. 
