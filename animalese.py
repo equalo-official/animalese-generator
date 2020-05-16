@@ -2,8 +2,8 @@ import random
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'The quick brown fox jumps over the lazy dog'
-pitch = 'lowest' # choose between 'high', 'med', 'low', or 'lowest'
+stringy = 'The quick brown fox jumps over the lazy dog.'
+pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 
 stringy = stringy.lower()
 sounds = {}
@@ -15,10 +15,13 @@ for index,ltr in enumerate(keys):
 		num = '0'+str(num)
 	sounds[ltr] = './sounds/'+pitch+'/sound'+str(num)+'.wav'
 
+if pitch == 'med':
+	rnd_factor = .35
+else:
+	rnd_factor = .25
 
 infiles = []
 
-#
 for i, char in enumerate(stringy):
 	try:
 		if char == 's' and stringy[i+1] == 'h': #test for 'sh' sound
@@ -47,11 +50,11 @@ for index,sound in enumerate(infiles):
 	tempsound = AudioSegment.from_wav(sound)
 	if stringy[len(stringy)-1] == '?':
 		if index >= len(infiles)*.8:
-			octaves = random.random() * 0.25 + (index-index*.8) * .1 + 2.1 # shift the pitch up by half an octave (speed will increase proportionally)
+			octaves = random.random() * rnd_factor + (index-index*.8) * .1 + 2.1 # shift the pitch up by half an octave (speed will increase proportionally)
 		else:
-			octaves = random.random() * 0.25 + 2.0
+			octaves = random.random() * rnd_factor + 2.0
 	else:
-		octaves = random.random() * 0.25 + 2.0 # shift the pitch up by half an octave (speed will increase proportionally)
+		octaves = random.random() * rnd_factor + 2.3 # shift the pitch up by half an octave (speed will increase proportionally)
 	new_sample_rate = int(tempsound.frame_rate * (2.0 ** octaves))
 	new_sound = tempsound._spawn(tempsound.raw_data, overrides={'frame_rate': new_sample_rate})
 	new_sound = new_sound.set_frame_rate(44100) # set uniform sample rate
