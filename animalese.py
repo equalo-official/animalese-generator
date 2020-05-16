@@ -1,6 +1,7 @@
 import random
 from pydub import AudioSegment
 from pydub.playback import play
+from string import ascii_lowercase
 
 stringy = 'The quick brown fox jumps over the lazy dog.'
 pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
@@ -8,7 +9,8 @@ pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 stringy = stringy.lower()
 sounds = {}
 
-keys = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','th','sh',' ','.']
+keys = [letter for letter in ascii_lowercase]
+keys.extend(['th', 'sh', ' ', '.'])
 for index,ltr in enumerate(keys):
 	num = index+1
 	if num < 10:
