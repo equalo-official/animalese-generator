@@ -11,11 +11,10 @@ sounds = {}
 
 keys = [letter for letter in ascii_lowercase]
 keys.extend(['th', 'sh', ' ', '.'])
-for index, letter in enumerate(keys):
-	num = index + 1
-	if num < 10:
-		num = f'0{num}'
-	sounds[letter] = f'./sounds/{pitch}/sound{num}.wav'
+for index, letter in enumerate(keys, 1):
+	if index < 10:
+		val = f'0{index}'
+	sounds[letter] = f'./sounds/{pitch}/sound{val}.wav'
 
 if pitch == 'med':
 	rnd_factor = 0.35
