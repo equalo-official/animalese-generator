@@ -9,7 +9,7 @@ class AnimaleseGenerator(object):
     ALL_CHARS = list(string.ascii_lowercase + 'ST P')  # lower alpha, special, and punctuation sounds
     ENUM_MAP = {char: idx for idx, char in
                 enumerate(ALL_CHARS, start=1)}  # character/index relationship: for accessing char filenames
-    RE_INVALID = re.compile(r'([^a-z .,?])')  # re method: for invalid character replacements
+    RE_INVALID = re.compile(r'([^a-z .,?!])')  # re method: for invalid character replacements
     RE_SPECIAL = re.compile(r'([st]h)')  # re method: for special sounds
     RE_REPEAT = re.compile(r'(.)\1+')  # re method: for repeated characters
     RE_SEGMENT = re.compile(r'([^.?! ].*?[.?!])')  # re method: for segmenting sentences
