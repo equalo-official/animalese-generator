@@ -1,64 +1,103 @@
+import os
 import random
+import re
+import string
 from pydub import AudioSegment
-from pydub.playback import play
 
-stringy = 'The quick brown fox jumps over the lazy dog.'
-pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
+class AnimaleseGenerator(object):
+    ALL_CHARS = list(string.ascii_lowercase + 'ST P')                        # lower alpha, special, and punctuation sounds
+    ENUM_MAP = {char: idx for idx, char in enumerate(ALL_CHARS, start=1)}  # character/index relationship: for accessing char filenames
+    PUNCTUATION_TABLE = str.maketrans('?,.', 'PPP')                          # string method: for punctuation character replacements
+    RE_INVALID = re.compile(r'([^a-z .,?])')                               # re method: for invalid character replacements
+    RE_SPECIAL = re.compile(r'([st]h)')                                    # re method: for special sounds
+    RE_REPEAT = re.compile(r'(.)\1+')                                        # re method: for repeated characters
+    RE_SEGMENT = re.compile(r'([^.?! ].*?[.?!])')                           # re method: for segmenting sentences
+    @classmethod
+    def _filename(cls, pitch, char):
+        filename = os.path.join(os.curdir, 
+                                'sounds',
+                                pitch, 
+                                f'sound{cls.ENUM_MAP[char]:02d}.wav')   
+        return filename        
+    
+    @classmethod
+    def _clean(cls, speech):
+        if not isinstance(speech, str):
+            message = f'Speech must be of type `str.`'
+            raise TypeError(message)
+            
+        def special_replace(matchobj):                                        # For remapping 'th' and 'sh' to 'T' and 'S'
+            return 'S' if matchobj.group(1) == 'sh' else 'T'
+                
+        speech = speech.lower()                                                # Forces letter characters to lowercase
+        speech = cls.RE_INVALID.sub('', speech)                                    # removes invalid characters
+        speech = cls.RE_SPECIAL.sub(special_replace, speech)                      # replaces special sounds
+        speech = cls.RE_REPEAT.sub(r'\1', speech)                                 # removes repeated characters
+        speech = speech.translate(cls.PUNCTUATION_TABLE)                            # replaces punctuation characters
+        return speech
+    
+    @classmethod
+    def _segment(cls, speech):
+        sentences = cls.RE_SEGMENT.findall(speech)                        
+        return sentences
+    
+    @classmethod
+    def _octaves(cls, speech, pitch, isquestion=False):
+        num_chars = len(speech)
+        rnd_factor = 0.35 if pitch == 'med' else 0.25
+        if isquestion:
+            octaves = [2.0 + random.random() * rnd_factor +
+                       (index >= 0.8 * num_chars) * (0.02 * index + 0.1) for index in range(num_chars)]
+        else:
+            octaves = [2.3 + random.random() * rnd_factor for index in range(num_chars)]
+        return octaves
+    
+    @classmethod
+    def _audio(cls, speech, octaves, pitch):
+        char_sounds = None
+        for char, octave in zip(speech, octaves):
+            char_filename = cls._filename(pitch, char)
+            char_sound = AudioSegment.from_wav(char_filename)
+            sample_rate = int(char_sound.frame_rate * (2.0 ** octave))
+            char_sound = char_sound._spawn(char_sound.raw_data, overrides={'frame_rate': sample_rate})
+            char_sound = char_sound.set_frame_rate(44100)
+            char_sounds = char_sound if char_sounds is None else char_sounds + char_sound
+            
+        return char_sounds
 
-stringy = stringy.lower()
-sounds = {}
-
-keys = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','th','sh',' ','.']
-for index,ltr in enumerate(keys):
-	num = index+1
-	if num < 10:
-		num = '0'+str(num)
-	sounds[ltr] = './sounds/'+pitch+'/sound'+str(num)+'.wav'
-
-if pitch == 'med':
-	rnd_factor = .35
-else:
-	rnd_factor = .25
-
-infiles = []
-
-for i, char in enumerate(stringy):
-	try:
-		if char == 's' and stringy[i+1] == 'h': #test for 'sh' sound
-			infiles.append(sounds['sh'])
-			continue
-		elif char == 't' and stringy[i+1] == 'h': #test for 'th' sound
-			infiles.append(sounds['th'])
-			continue
-		elif char == 'h' and (stringy[i-1] == 's' or stringy[i-1] == 't'): #test if previous letter was 's' or 's' and current letter is 'h'
-			continue
-		elif char == ',' or char == '?':
-			infiles.append(sounds['.'])
-			continue
-		elif char == stringy[i-1]: #skip repeat letters
-			continue
-	except:
-		pass
-	if not char.isalpha() and char != '.': # skip characters that are not letters or periods. 
-		continue
-	infiles.append(sounds[char])
-
-combined_sounds = None
-
-print(len(infiles))
-for index,sound in enumerate(infiles):
-	tempsound = AudioSegment.from_wav(sound)
-	if stringy[len(stringy)-1] == '?':
-		if index >= len(infiles)*.8:
-			octaves = random.random() * rnd_factor + (index-index*.8) * .1 + 2.1 # shift the pitch up by half an octave (speed will increase proportionally)
-		else:
-			octaves = random.random() * rnd_factor + 2.0
-	else:
-		octaves = random.random() * rnd_factor + 2.3 # shift the pitch up by half an octave (speed will increase proportionally)
-	new_sample_rate = int(tempsound.frame_rate * (2.0 ** octaves))
-	new_sound = tempsound._spawn(tempsound.raw_data, overrides={'frame_rate': new_sample_rate})
-	new_sound = new_sound.set_frame_rate(44100) # set uniform sample rate
-	combined_sounds = new_sound if combined_sounds is None else combined_sounds + new_sound
-
-
-combined_sounds.export("./sound.wav", format="wav")
+    @classmethod
+    def from_string(cls, speech, pitch='med'):
+        '''
+        Method for delivering speech. Octave shifts are handles automatically for each sentences
+        :param speech: One or more sentences to be digested
+        :param pitch: 'lowest', 'low', 'med', or 'high'
+        
+        Future improvements:
+            Fix issues with abbreviations, e.g. 'Mr.', 'Sr.', and 'Dr..' and so on.
+                Perhaps a regex filter with the common ones could be added.
+        '''
+        sentences = cls._segment(speech)
+        audio_sentences = None
+        for sentence in sentences:
+            isquestion = sentence[-1] == '?'
+            sentence = cls._clean(sentence)
+            octaves = cls._octaves(sentence, pitch, isquestion)
+            audio_sentence = cls._audio(sentence, octaves, pitch)
+            audio_sentences = audio_sentence if audio_sentences is None else audio_sentences + audio_sentence
+        
+        audio_sentences.export("./sound.wav", format="wav")
+        
+# test
+if __name__ == '__main__':
+    stringy = '''We use words like honor, code, loyalty...we use these words \
+    as the backbone to a life spent defending something. You use 'em as a \
+    punchline. I have neither the time nor the inclination to explain myself \
+    to a man who rises and sleeps under the blanket of the very freedom I \
+    provide, then questions the manner in which I provide it! I'd rather you \
+    just said thank you and went on your way. Otherwise, I suggest you pick up\
+    a weapon and stand a post. Either way, I don't give a damn what you think \
+    you're entitled to!'''
+    
+    pitch = 'low' # choose between 'high', 'med', 'low', or 'lowest'
+    AnimaleseGenerator.from_string(stringy, pitch)
+    
