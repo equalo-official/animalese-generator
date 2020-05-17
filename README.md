@@ -11,3 +11,12 @@ Project is created with:
 ```
 $ pip install pydub
 ```
+
+[You'll also need to install `ffmpeg` or `libav` for this to work](https://github.com/jiaaro/pydub#dependencies)
+```
+$ brew install ffmpeg
+```
+or
+```
+$ brew install libav
+```
