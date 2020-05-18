@@ -2,7 +2,7 @@ import os
 import random
 import re
 import string
-from pydub import AudioSegment
+from pydub import AudioSegment, playback
 
 
 class AnimaleseGenerator(object):
@@ -70,21 +70,21 @@ class AnimaleseGenerator(object):
 
     @classmethod
     def _audio(cls, speech, octaves, pitch):
-        char_sounds = None
+        audio_segment = AudioSegment.empty()
         for char, octave in zip(speech, octaves):
             char_filename = cls._filename(pitch, char)
             char_sound = AudioSegment.from_wav(char_filename)
             sample_rate = int(char_sound.frame_rate * (2.0 ** octave))
             char_sound = char_sound._spawn(char_sound.raw_data, overrides={'frame_rate': sample_rate})
             char_sound = char_sound.set_frame_rate(44100)
-            char_sounds = char_sound if char_sounds is None else char_sounds + char_sound
+            audio_segment += char_sound
 
-        return char_sounds
+        return audio_segment
 
     @classmethod
-    def from_string(cls, speech, pitch='med'):
+    def make(cls, speech, pitch='med'):
         """
-        Method for delivering speech. Octave shifts are handles automatically for each sentences
+        Method for delivering speech. Octave shifts are handled automatically for each sentence.
         :param speech: One or more sentences to be digested
         :param pitch: 'lowest', 'low', 'med', or 'high'
 
@@ -92,19 +92,19 @@ class AnimaleseGenerator(object):
             Fix issues with abbreviations, e.g. 'Mr.', 'Sr.', and 'Dr..' and so on.
                 Perhaps a regex filter with the common ones could be added.
         """
+        audio_segment = AudioSegment.empty()
         sentences = cls._segment(speech)
-        audio_sentences = None
         for sentence in sentences:
             isquestion = sentence[-1] == '?'
             sentence = cls._clean(sentence)
             octaves = cls._octaves(sentence, pitch, isquestion)
-            audio_sentence = cls._audio(sentence, octaves, pitch)
-            audio_sentences = audio_sentence if audio_sentences is None else audio_sentences + audio_sentence
+            audio_subsegment = cls._audio(sentence, octaves, pitch)
+            audio_segment += audio_subsegment
 
-        audio_sentences.export("./sound.wav", format="wav")
+        return audio_segment
 
 
-# test
+# Usage
 if __name__ == '__main__':
     stringy = ("We use words like honor, code, loyalty...we use these words "
                "as the backbone to a life spent defending something. You use 'em as a "
@@ -116,4 +116,11 @@ if __name__ == '__main__':
                "you're entitled to!")
 
     pitch = 'low'  # choose between 'high', 'med', 'low', or 'lowest'
-    AnimaleseGenerator.from_string(stringy, pitch)
+    audio_segment = AnimaleseGenerator.make(stringy, pitch)
+    
+#   Playback (requires ffmpeg or libav)
+#    playback.play(audio_segment)
+
+#   Export: 
+    export_dir = os.path.join(os.curdir, 'sound.wav')
+    audio_segment.export(export_dir, 'wav')
