@@ -8,7 +8,7 @@ pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 stringy = stringy.lower()
 sounds = {}
 
-keys = string.ascii_lowercase + ['th','sh',' ','.']
+keys = list(string.ascii_lowercase) + ['th','sh',' ','.']
 for index,ltr in enumerate(keys):
 	num = index+1
 	if num < 10:
