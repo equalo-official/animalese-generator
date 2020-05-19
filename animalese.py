@@ -1,4 +1,4 @@
-import random
+import random, string
 from pydub import AudioSegment
 from pydub.playback import play
 
@@ -8,7 +8,7 @@ pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 stringy = stringy.lower()
 sounds = {}
 
-keys = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','th','sh',' ','.']
+keys = string.ascii_lowercase + ['th','sh',' ','.']
 for index,ltr in enumerate(keys):
 	num = index+1
 	if num < 10:
