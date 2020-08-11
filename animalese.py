@@ -42,7 +42,7 @@ if kanamode:
                 infiles.append(sounds[char])
                 continue
             elif char in ['a','i','u','e','o']: #don't duplicate vowels
-                if stringy[i-1] in ['a','i','u','e','o']:
+                if stringy[i-1] in ['a','i','u','e','o',' ','.',',','?']:
                     infiles.append(sounds[char])
                 continue
             elif char+stringy[i+1] in ['ch','sh','ts','dz']: #three-letter kana
