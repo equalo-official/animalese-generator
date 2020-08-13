@@ -2,7 +2,7 @@ import random
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'yare yare daze'
+stringy = '*i a*r shi*k !f doi*m zi*s'
 pitch = 'BOY' # choose between 'high', 'med', 'low', or 'lowest', or 'BOY', 'GAL' or 'MAN'
 kanamode = True #should be true if using 'BOY', 'GAL' or 'MAN' - stringy should only use valid kana. Invalid Kana are user error.
 
@@ -10,7 +10,7 @@ stringy = stringy.lower()
 sounds = {}
 
 if kanamode:
-    keys = ['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','hu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n','ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dzi','dzu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po','0','1','2','3','4','5','6','7','8','9','!a','!b','!c','!d','!e','!f','!g','!h','!i','!j','!k','!l','!m','!n','!o','!p','!q','!r','!s','!t','!u','!v','!w','!x','!y','!z']
+    keys = ['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','hu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n','ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dzi','dzu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po','*0','*1','*2','*3','*4','*5','*6','*7','*8','*9','!a','!b','!c','!d','!e','!f','!g','!h','!i','!j','!k','!l','!m','!n','!o','!p','!q','!r','!s','!t','!u','!v','!w','!x','!y','!z','*i','*r','*s','*b','*i','*f','*a','*m','*n','*f','*g','*k','*z','*o','*q','*u','*d','*v']
     if pitch == 'BOY':
         indexnum = 219
     elif pitch == 'GAL':
@@ -42,7 +42,7 @@ if kanamode:
                 infiles.append(sounds[char])
                 continue
             elif char in ['a','i','u','e','o']: #don't duplicate vowels
-                if stringy[i-1] in ['a','i','u','e','o']:
+                if stringy[i-1] in ['a','i','u','e','o',' ','^','.','?',',']:
                     infiles.append(sounds[char])
                 continue
             elif char+stringy[i+1] in ['ch','sh','ts','dz']: #three-letter kana
@@ -53,18 +53,17 @@ if kanamode:
             elif char == ',' or char == '?':
                 infiles.append(sounds['.'])
                 continue
-            elif char == '!': #A-Z keyboard sound
+            elif char in ['!','*']: #A-Z keyboard sound, enunciation sounds
                 infiles.append(sounds[char+stringy[i+1]])
                 continue
-            elif stringy[i-1]=='!': 
+            elif stringy[i-1] in ['!','*']: 
                 continue
             elif char == stringy[i-1]: #skip repeat letters
                 continue
         except:
             pass
-        if not char.isalpha() and char != '.': # skip characters that are not letters or periods. 
-            continue
-        infiles.append(sounds[char+stringy[i+1]])
+        if not char.isalpha() and char != '.' and i+1>=len(stringy): # skip characters that are not letters or periods. 
+            infiles.append(sounds[char+stringy[i+1]])
 else:
     for i, char in enumerate(stringy):
         try:
