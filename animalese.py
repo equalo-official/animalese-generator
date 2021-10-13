@@ -2,7 +2,7 @@ import random
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'The quick brown fox jumps over the lazy dog.'
+stringy = 'shicochuco'
 pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 
 stringy = stringy.lower()
