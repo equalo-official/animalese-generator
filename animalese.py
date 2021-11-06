@@ -1,8 +1,15 @@
+#!/usr/bin/python3
+
+import sys
 import random
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'The quick brown fox jumps over the lazy dog.'
+if len(sys.argv) < 2:
+    print("Type ./animalease.py <test to speech>")
+    sys.exit(1)
+
+stringy = sys.argv[1]
 pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
 
 stringy = stringy.lower()
@@ -39,7 +46,7 @@ for i, char in enumerate(stringy):
 			continue
 	except:
 		pass
-	if not char.isalpha() and char != '.': # skip characters that are not letters or periods. 
+	if not char.isalpha() and char != '.': # skip characters that are not letters or periods.
 		continue
 	infiles.append(sounds[char])
 
