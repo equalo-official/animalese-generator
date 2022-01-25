@@ -1,9 +1,21 @@
+#!/usr/bin/python
+
 import random
+import argparse
 from pydub import AudioSegment
 from pydub.playback import play
 
-stringy = 'The quick brown fox jumps over the lazy dog.'
-pitch = 'med' # choose between 'high', 'med', 'low', or 'lowest'
+parser = argparse.ArgumentParser(description='Create animalese audio')
+parser.add_argument('words', type=str, nargs='+',
+                    help='words of the sentence')
+parser.add_argument('--pitch', default='med', type=str,
+                    help="voice pitch, choose between 'high', 'med', 'low' or 'lowest'")
+parser.add_argument('--out', default='sound.wav', type=str,
+                    help="output file")
+args = parser.parse_args()
+stringy = ' '.join(args.words)
+pitch = args.pitch
+out_file = args.out
 
 stringy = stringy.lower()
 sounds = {}
@@ -61,4 +73,4 @@ for index,sound in enumerate(infiles):
 	combined_sounds = new_sound if combined_sounds is None else combined_sounds + new_sound
 
 
-combined_sounds.export("./sound.wav", format="wav")
+combined_sounds.export(out_file, format="wav")
